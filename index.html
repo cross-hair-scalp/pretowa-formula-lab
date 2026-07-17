@@ -391,7 +391,7 @@ select,input{width:100%;border:1px solid var(--line);border-radius:14px;backgrou
   <h2>計算結果</h2>
   <div id="result" class="result"></div>
   <button class="copybtn" onclick="copyAll()">電子カルテ用にコピー</button>
-  <div class="copyHint">薬剤比率とOXのみ。量は入れず、そのままカルテに貼れる形式です。</div>
+  <div class="copyHint">薬剤比率・各薬剤の量・OX量・合計量を、そのままカルテに貼れる形式で表示します。</div>
   <label>コピー内容</label>
   <textarea id="copyText" class="copyArea" readonly></textarea>
 </section>
@@ -1010,7 +1010,18 @@ function formatZoneText(title,z,r){
   const lines=[];
   if(zoneMode!==1) lines.push(title);
 
-  // g数のみ
+  // 配合比と％指定
+  const ratioParts=r.amounts.filter(x=>x.group==="rat" && x.value>0);
+  if(ratioParts.length){
+    const names=ratioParts.map(x=>x.name).join(":");
+    const values=ratioParts.map(x=>x.value).join(":");
+    lines.push(names+"="+values);
+  }
+  r.amounts.filter(x=>x.group==="pct" && x.value>0).forEach(x=>{
+    lines.push(x.name+" "+x.value+"%");
+  });
+
+  // 各薬剤のg数
   r.amounts.forEach(x=>{
     if(x.g>0) lines.push(x.name+" "+g(x.g));
   });
